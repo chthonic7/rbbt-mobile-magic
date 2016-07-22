@@ -9,7 +9,7 @@
     <map on-create="mapCreated(map)"> </map>
   </ion-content>
   <ion-footer-bar class="bar-dark">
-    <a ng-click="centerOnMe()" class="button button-icon icon ">Refresh</a>
-    <a href="#/app/qual" ng-click="sendReq()" class="button button-icon icon">Qualify</a>
+    <a ng-show="!roaming.value" ng-click="centerOnMe()" class="button button-icon icon ">Recenter</a>
+    <a href="#/app/qual" ng-click="sendAReq()" class="button button-icon icon">Qualify</a>
   </ion-footer-bar>
 </ion-view>

@@ -1,5 +1,5 @@
 angular.module('review.controller', ['ngCordova'])
-.controller('reviewCtrl', function($scope, $ionicPlatform, $cordovaFile){
+.controller('reviewCtrl', function($scope, $state, $ionicPlatform, $cordovaFile, $http){
     $scope.init = function(){
         $ionicPlatform.ready(function(){
             if(window.cordova && window.cordova.file){
@@ -15,29 +15,36 @@ angular.module('review.controller', ['ngCordova'])
             }
         });
     };
-
-    $scope.rm = function(){
-        $ionicPlatform.ready(function(){
-            if(window.cordova && window.cordova.file){
-                $cordovaFile.removeFile(cordova.file.dataDirectory, "lederhosen.hist");
-            }
-        })
+    $scope.finalize = function(){
+        var queryString = encodeURI("record="+$scope.uuid+"&deleted=0"+"&uid="+$scope.maddr.val);
+        $http.post("https://sales.jabtools.com/ajax/mobile.php", queryString, {headers:{'Content-Type': 'application/x-www-form-urlencoded'}}).then(
+            function(){$scope.resetId();},
+            function(){$scope.resetId(); alert("Could not access network");});
+        $state.go('app.map');
     };
-
-    $scope.spinRust = function(){
-        var log_geo = "Geolocation: "+$scope.data.lat+", "+$scope.data.lng+"\n";
-        var log_addr;
-        var log_qual;
-        var log_plans;
-        var log_date;
-        var log_cust;
-        var log = log_geo + log_addr + log_qual + log_plans + log_date + log_cust + "\n";
-        $cordovaFile.writeExistingFile(cordova.file.dataDirectory, "leads.hist", log).then(
-            function(){
-                alert("Saved");
-            },
-            function(){
-                alert("Problem saving data")
-            });
+    $scope.reGeo = function(){
+        $scope.data.addr.street = "";
+        $scope.data.addr.city = "";
+        $scope.data.addr.state = "";
+        $scope.data.addr.postal = "";
+        $scope.data.qual.levels = [];
+        $scope.data.qual.los = "";
+        $scope.data.plans = [];
+        $scope.data.date = $filter("date")(new Date(), 'yyyy-MM-dd');
+        $scope.data.cust.fname = "";
+        $scope.data.cust.lname = "";
+        $scope.data.cust.phone = "";
+        $scope.data.cust.email = "";
+        $scope.data.cust.notes = "";
+        $scope.qual = "Qualification pending...";
+        $state.go('app.map');
+    };
+    $scope.reQual = function(){
+        $scope.data.cust.fname = "";
+        $scope.data.cust.lname = "";
+        $scope.data.cust.phone = "";
+        $scope.data.cust.email = "";
+        $scope.data.cust.notes = "";
+        $state.go('app.qual');
     };
 })
