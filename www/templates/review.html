@@ -1,0 +1,18 @@
+<ion-view view-title="Review Lead" ng-controller="reviewCtrl">
+  <ion-header-bar class="bar-dark">
+    <button menu-toggle="left" class="button button-icon icon ion-navicon"></button>
+    <span>Summary</span>
+  </ion-header-bar>
+  <ion-content class="has-header">
+    <ion-list type="card">
+      <ion-item>Address: {{data.addr.street}}, {{data.addr.city}}, {{data.addr.state}} {{data.addr.postal}}</ion-item>
+      <ion-item>Plans Selected: {{data.plans.join(", ")}}</ion-item>
+      <ion-item>Suggested Start Date: {{data.date}}</ion-item>
+      <ion-item>Name: {{data.cust.fname}} {{data.cust.lname}}</ion-item>
+      <ion-item>Phone: {{data.cust.phone}}</ion-item>
+      <ion-item>Email: {{data.cust.email}}</ion-item>
+      <ion-item>Notes: {{data.cust.notes}}</ion-item>
+    </ion-list>
+    <div class="button button-block button-positive" value="Finalize">
+  </ion-content>
+</ion-view>
