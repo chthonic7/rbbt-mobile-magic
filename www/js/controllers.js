@@ -1,5 +1,5 @@
 angular.module('starter.controllers', ['ui.router', 'ngCordova'])
-    .controller('mainCtrl', function($scope, $cordovaFile, $ionicPlatform, $http, $filter, $cordovaCamera) {
+.controller('mainCtrl', function($scope, $state, $cordovaFile, $ionicPlatform, $http, $filter, $cordovaCamera) {
     $scope.data={
         loc:{
             lat: 39.5784168,
@@ -27,15 +27,27 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
     }
     $scope.minDate = new Date();
     $scope.qual = "Qualification pending...";
+    $scope.roaming = {value: false};
+    $ionicPlatform.ready(function() {
+        if(window.MacAddress) {
+            MacAddress.getMacAddress(function(maddr){
+                $scope.maddr = {val: maddr};
+            }, function(err){alert(err);});
+        }
+        else{
+            alert("hi");
+        }
+    });
 
     $scope.sendReq = function(){
         $http.get("https://maps.googleapis.com/maps/api/geocode/json?latlng="+$scope.data.loc.lat+","+$scope.data.loc.lng+"&key=AIzaSyDTjXAh39Y1K6n6tnH5SP-bMD0YcdeodS8").then($scope.addrResp, $scope.onFail);
         if($scope.uuid){
-            $http.get("https://sales.jabtools.com/ajax/mobile.php?record="+$scope.uuid+"&geo="+$scope.data.loc.lat+","+$scope.data.loc.lng, {timeout: 125000}).then($scope.parseResp, $scope.onFail);
+            var queryString = encodeURI("record="+$scope.uuid+"&geo="+$scope.data.loc.lat+","+$scope.data.loc.lng+"&uid="+$scope.maddr.val);
         }
         else{
-            $http.get("https://sales.jabtools.com/ajax/mobile.php?geo="+$scope.data.loc.lat+","+$scope.data.loc.lng, {timeout: 125000}).then($scope.parseResp, $scope.onFail);
+            var queryString = encodeURI("geo="+$scope.data.loc.lat+","+$scope.data.loc.lng+"&uid="+$scope.maddr.val);
         }
+        $http.post("https://sales.jabtools.com/ajax/mobile.php",queryString, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then($scope.parseResp, $scope.onFail);
     };
 
     $scope.addrResp = function(resp){
@@ -117,23 +129,59 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         alert('Error: ' + JSON.stringify(error));
     };
 
-    $scope.selfieTime = function(){
-        var options = {
-            saveToPhotoAlbum: true
-        };
-        $ionicPlatform.ready(function(){
-            $cordovaCamera.getPicture(options).then(function(imageData){
-                alert("you took a picture");
-                alert(imageData);
-            });
-        });
+    $scope.resetId = function(){
+        delete $scope.uuid;
+        $scope.data.addr.street = "";
+        $scope.data.addr.city = "";
+        $scope.data.addr.full = "Looking up address...";
+        $scope.data.qual.levels = [];
+        $scope.data.qual.los = "";
+        $scope.data.plans = [];
+        $scope.data.date = $filter("date")(new Date(), 'yyyy-MM-dd');
+        $scope.data.cust.fname = "";
+        $scope.data.cust.lname = "";
+        $scope.data.cust.phone = "";
+        $scope.data.cust.email = "";
+        $scope.data.cust.notes = "";
+        $scope.qual = "Qualification pending...";
     };
 
-    $scope.postTime = function(){
-        $http.post("https://sales.jabtools.com/ajax/mobile.php", 'record=m001577d6be8f00cd3.73054109&internet_c=10MB',{
-            headers:{
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        }).then(function(resp){alert(JSON.stringify(resp));}, function(err){alert("Error"+JSON.stringify(err));});
+    $scope.reGeo = function(){
+        $scope.data.addr.street = "";
+        $scope.data.addr.city = "";
+        $scope.data.addr.state = "";
+        $scope.data.addr.postal = "";
+        $scope.data.qual.levels = [];
+        $scope.data.qual.los = "";
+        $scope.data.plans = [];
+        $scope.data.date = $filter("date")(new Date(), 'yyyy-MM-dd');
+        $scope.qual = "Qualification pending...";
+        $state.go('app.map');
     };
+
+    $scope.reQual = function(){
+        $scope.data.cust.fname = "";
+        $scope.data.cust.lname = "";
+        $scope.data.cust.phone = "";
+        $scope.data.cust.email = "";
+        $scope.data.cust.notes = "";
+        $state.go('app.qual');
+    };
+
+    $ionicPlatform.onHardwareBackButton(function(){
+        switch($state.current.name){
+        case 'app.map':
+            ionic.Platform.exitApp();
+            break;
+        case 'app.qual':
+            $scope.reGeo();
+            break;
+        case 'app.info':
+            $scope.reQual();
+            break;
+        case 'app.review':
+            $state.go('app.info');
+            break;
+        }
+    });
 });

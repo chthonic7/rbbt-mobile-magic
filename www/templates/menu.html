@@ -8,23 +8,11 @@
     <header class="bar bar-header bar-assertive">
       <h1 class="title">Options</h1>
     </header>
-    <subheader class="bar bar-subheader">
-      <p>Logged in as: guest</p>
-    </subheader>
     <ion-content class="has-header has-subheader">
       <ion-list>
-        <ion-item></ion-item>
-        <ion-item nav-clear menu-close href="#/app/login">
-          Log In
-        </ion-item>
-        <ion-item nav-clear menu-close href="#/app/map">
-          Leads
-        </ion-item>
-        <ion-item nav-clear menu-close ng-click="selfieTime()">
-          First Let Me Take a Selfie
-        </ion-item>
-        <ion-item nav-clear menu-close ng-click="postTime()">
-          Post_Test
+        <ion-toggle ng-show="$state.is('app.map')" ng-model="roaming.value" toggle-class="toggle-calm">Roaming</ion-toggle>
+        <ion-item nav-clear menu-close ng-click="resetId()" ng-href="#/app/map">
+          New Lead
         </ion-item>
       </ion-list>
     </ion-content>
