@@ -39,12 +39,4 @@ angular.module('review.controller', ['ngCordova'])
         $scope.qual = "Qualification pending...";
         $state.go('app.map');
     };
-    $scope.reQual = function(){
-        $scope.data.cust.fname = "";
-        $scope.data.cust.lname = "";
-        $scope.data.cust.phone = "";
-        $scope.data.cust.email = "";
-        $scope.data.cust.notes = "";
-        $state.go('app.qual');
-    };
 })

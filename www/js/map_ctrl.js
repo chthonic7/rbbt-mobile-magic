@@ -5,7 +5,7 @@ angular.module('map.controllers', ['starter.controllers'])
             window.plugins.insomnia.keepAwake();
         }
         else{
-            alert("hi");
+            alert("Plugin Insomnia not loaded!");
         }
     });
     $scope.mapCreated = function(map) {
@@ -50,35 +50,28 @@ angular.module('map.controllers', ['starter.controllers'])
                 $scope.heading.decl = geomagnetism.model().point([pos.lat(), pos.lng()]).decl;
             });
         });
+        $scope.$watch("roaming.value", function(val){
+            if(val==true){
+                $scope.marker.setDraggable(false);
+                navigator.geolocation.getCurrentPosition($scope.onUpdateSucc, function(error){alert("Couldn't establish location"); clearInterval($scope.watcher);}, {timeout:10000, maximumAge:10000, enableHighAccuracy:true});
+                $scope.watcher = setInterval(function(){
+                    navigator.geolocation.getCurrentPosition($scope.onUpdateSucc, function(error){alert("Couldn't establish location"); clearInterval($scope.watcher);}, {timeout:10000, maximumAge:10000, enableHighAccuracy:true});
+                }, 10000);
+            }
+            else{
+                $scope.marker.setDraggable(true);
+                if ($scope.watcher){
+                    clearInterval($scope.watcher);
+                }
+            }
+        });
         $scope.centerOnMe();
     };
+
     $scope.heading = {
         magHeading: 0,
         trueHeading: 0,
         decl: 0
-    };
-    $scope.$watch("roaming.value", function(val){
-        if(val==true){
-            $scope.marker.setDraggable(false);
-            navigator.geolocation.getCurrentPosition($scope.onUpdateSucc, function(error){alert("Couldn't establish location"); clearInterval($scope.watcher);}, {timeout:10000, maximumAge:10000, enableHighAccuracy:true});
-            $scope.watcher = setInterval(function(){
-                navigator.geolocation.getCurrentPosition($scope.onUpdateSucc, function(error){alert("Couldn't establish location"); clearInterval($scope.watcher);}, {timeout:10000, maximumAge:10000, enableHighAccuracy:true});
-            }, 10000);
-        }
-        else{
-            $scope.marker.setDraggable(true);
-            if ($scope.watcher){
-                clearInterval($scope.watcher);
-            }
-        }
-    });
-    $scope.sendAReq = function(){
-        navigator.geolocation.getCurrentPosition(function(pos){
-            $scope.$apply(function(){
-                $scope.data.loc.lat = pos.coords.latitude;
-                $scope.data.loc.lng = pos.coords.longitude;
-            });}, function(error){}, {timeout:10000, maximumAge:10000, enableHighAccuracy:true});
-        $scope.sendReq();
     };
     $ionicPlatform.ready(function(){
         $scope.watch = $cordovaDeviceOrientation.watchHeading().then(
@@ -91,37 +84,38 @@ angular.module('map.controllers', ['starter.controllers'])
                 $scope.heading.trueHeading = ($scope.heading.magHeading + $scope.heading.decl + 360) % 360;
                 $scope.icon.rotation = $scope.heading.trueHeading;
                 $scope.marker.setIcon($scope.icon);
-                // $scope.eMap.css({
-                //     '-webkit-transform': 'rotate(' + $scope.heading.trueHeading + 'deg)'
-                // });
             }
         );
     });
+
     $scope.centerOnMe = function () {
-        console.log("Centering");
         if (!$scope.map) {
             return;
         }
-
         $scope.loading = $ionicLoading.show({
             content: 'Getting current location...',
 
         });
-
         navigator.geolocation.getCurrentPosition($scope.onUpdateSucc, function(error){alert("Couldn't establish location");});
+    };
+
+    $scope.sendAReq = function(){
+        navigator.geolocation.getCurrentPosition(function(pos){
+            $scope.$apply(function(){
+                $scope.data.loc.lat = pos.coords.latitude;
+                $scope.data.loc.lng = pos.coords.longitude;
+            });}, function(error){}, {timeout:10000, maximumAge:10000, enableHighAccuracy:true});
+        $scope.sendReq();
     };
     $scope.onUpdateSucc = function(pos){
         var newPos = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
         $scope.map.setCenter(newPos);
-        $scope.marker.setPosition(newPos);
+        $scope.$apply(function(){
+            $scope.heading.decl = geomagnetism.model().point([pos.coords.latitude, pos.coords.longitude]).decl;
+        });
         if($scope.loading){
             $scope.loading.hide();
         }
-        $scope.$apply(function(){
-            $scope.data.loc.lat = pos.coords.latitude;
-            $scope.data.loc.lng = pos.coords.longitude;
-            $scope.heading.decl = geomagnetism.model().point([pos.coords.latitude, pos.coords.longitude]).decl;
-        });
         if ((Math.abs($scope.data.loc.lat - pos.coords.latitude) > .0005) || (Math.abs($scope.data.loc.lng - pos.coords.longitude) > .0005)){
             $scope.$apply(function(){
                 $scope.data.loc.lat = pos.coords.latitude;

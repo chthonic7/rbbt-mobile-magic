@@ -16,35 +16,43 @@ angular.module('starter', ['ionic', 'map.controllers', 'qual.controllers', 'info
             abstract: true,
             templateUrl: "templates/menu.html"
         })
+        .state('app.login',{
+            url: '/login',
+            views:{
+                'menuContent': {
+                    templateUrl: 'templates/login.html'
+                }
+            }
+        })
         .state('app.map',{
             url: '/map',
             views:{
-                'menuContent' :{
-                    templateUrl: 'templates/map.html',
+                'menuContent': {
+                    templateUrl: 'templates/map.html'
                 }
             }
         })
         .state('app.qual',{
             url: '/qual',
             views:{
-                'menuContent' :{
-                    templateUrl: 'templates/qual.html',
+                'menuContent': {
+                    templateUrl: 'templates/qual.html'
                 }
             }
         })
         .state('app.info',{
             url: '/info',
             views:{
-                'menuContent' :{
-                    templateUrl: 'templates/info.html',
+                'menuContent': {
+                    templateUrl: 'templates/info.html'
                 }
             }
         })
         .state('app.review',{
             url: '/review',
             views:{
-                'menuContent' :{
-                    templateUrl: 'templates/review.html',
+                'menuContent': {
+                    templateUrl: 'templates/review.html'
                 }
             }
         });

@@ -24,7 +24,7 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
             email: "",
             notes: ""
         }
-    }
+    };
     $scope.minDate = new Date();
     $scope.qual = "Qualification pending...";
     $scope.roaming = {value: false};
@@ -35,7 +35,7 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
             }, function(err){alert(err);});
         }
         else{
-            alert("hi");
+            alert("Cannot obtain MAC address");
         }
     });
 
@@ -127,6 +127,18 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
 
     $scope.onFail = function (error){
         alert('Error: ' + JSON.stringify(error));
+    };
+
+    $scope.selfieTime = function(){
+        var options = {
+            saveToPhotoAlbum: true
+        };
+        $ionicPlatform.ready(function(){
+            $cordovaCamera.getPicture(options).then(function(imageData){
+                alert("you took a picture");
+                alert(imageData);
+            });
+        });
     };
 
     $scope.resetId = function(){
