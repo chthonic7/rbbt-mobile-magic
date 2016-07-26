@@ -170,10 +170,14 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         $state.go('app.qual');
     };
 
-    $ionicPlatform.onHardwareBackButton(function(){
+    $ionicPlatform.registerBackButtonAction(function(){
         switch($state.current.name){
         case 'app.map':
             ionic.Platform.exitApp();
+            break;
+        case 'app.tower':
+        case 'app.login':
+            $state.go('app.map');
             break;
         case 'app.qual':
             $scope.reGeo();
@@ -185,5 +189,5 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
             $state.go('app.info');
             break;
         }
-    });
+    }, 101);
 });

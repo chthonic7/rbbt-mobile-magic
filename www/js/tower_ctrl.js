@@ -1,5 +1,6 @@
 angular.module('tower.controllers', ['starter.controllers'])
 .controller('twrCtrl', function($scope, $ionicLoading, $ionicPlatform, $cordovaDeviceOrientation, $http) {
+    // Prevent the phone from going to sleep
     $ionicPlatform.ready(function() {
         if(window.plugins && window.plugins.insomnia) {
             window.plugins.insomnia.keepAwake();
@@ -8,8 +9,12 @@ angular.module('tower.controllers', ['starter.controllers'])
             alert("Plugin Insomnia not loaded!");
         }
     });
+
+    // When the map is drawn, add a marker to the map and then automatically ask for towers.
     $scope.mapCreated = function(map) {
+        // Bind the map to the scope
         $scope.map = map;
+        //Our custom icon to show heading, cuz gmap's arrow is dumb.
         $scope.icon = {
             path: "M 0,-6 3,6 0,1 -3,6 z",
             fillColor: "#000",
@@ -21,31 +26,47 @@ angular.module('tower.controllers', ['starter.controllers'])
             position: $scope.data.loc,
             animation: google.maps.Animation.DROP,
             icon: $scope.icon,
-            draggable: false,
+            draggable: false, //Don't need them to mess with the arrow's positioning
             map: $scope.map
         });
-        // $scope.centerOnMe();
+        // Refresh our current location
+        $scope.centerOnMe();
+        // Calculate the difference between true (gmaps) heading and magnetic heading at this location
         $scope.heading.decl = geomagnetism.model().point([$scope.data.loc.lat, $scope.data.loc.lng]).decl;
+        // Ask for towers
+        $scope.towerReq();
     };
 
+    // Keep all heading info in one nice place.
+    // magHeading - magnetic heading grabbed from compass
+    // trueHeading - true (gmaps) heading = magHeading + decl
+    // decl - difference b/w magHeading and trueHeading
+    // goal - the heading of the tower we want to point to.
     $scope.heading = {
         magHeading: 0,
         trueHeading: 0,
         decl: 0,
         goal: 0
     };
+    // To keep track of the towers we got. It's nice to not lose reference of things we care about.
     $scope.towers = {lines:[], labels:[]};
+
+    // Start listening to device heading
     $ionicPlatform.ready(function(){
         $scope.watch = $cordovaDeviceOrientation.watchHeading().then(
             null,
             function(err){
                 alert(err);
             },
+            // When the heading updates, calculate true heading, point the marker, and see if we're near the goal
             function(result){
                 $scope.heading.magHeading = result.magneticHeading;
+                // Calculate true heading, and add 360 to keep heading in the right range
                 $scope.heading.trueHeading = ($scope.heading.magHeading + $scope.heading.decl + 360) % 360;
+                // Update our marker to face the right way.
                 $scope.icon.rotation = $scope.heading.trueHeading;
                 $scope.marker.setIcon($scope.icon);
+                // If the heading is within +/- 5 degrees of the target heading, set the text to green, otherwise, make it white.
                 if ((Math.abs($scope.heading.trueHeading - $scope.heading.goal) <= 5) || ((360 - Math.abs($scope.heading.trueHeading - $scope.heading.goal)) <= 5)) {
                     angular.element(document.getElementById('shiny')).css('color',"#00ff00");
                 }
@@ -56,10 +77,14 @@ angular.module('tower.controllers', ['starter.controllers'])
         );
     });
 
+    // Grab the lat/long
     $scope.centerOnMe = function () {
+        // If we don't have a map, don't do anything
         if (!$scope.map) {
             return;
         }
+
+        // Display spinner while gps is working
         $scope.loading = $ionicLoading.show({
             content: 'Getting current location...',
 
@@ -67,20 +92,29 @@ angular.module('tower.controllers', ['starter.controllers'])
         navigator.geolocation.getCurrentPosition($scope.onUpdateSucc, function(error){alert("Couldn't establish location");});
     };
 
+    // When we get a new lat/long, center map at loc and place marker there. Also update heading.decl
     $scope.onUpdateSucc = function(pos){
+        // Create a google maps latlng object using results
         var newPos = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
         $scope.map.setCenter(newPos);
         $scope.marker.setPosition(newPos);
+        // $scope.$apply is needed for the variables to properly update, for now
         $scope.$apply(function(){
+            // Update location
             $scope.data.loc.lat = pos.coords.latitude;
             $scope.data.loc.lng = pos.coords.longitude;
+            // Update declination
             $scope.heading.decl = geomagnetism.model().point([pos.coords.latitude, pos.coords.longitude]).decl;
         });
+        //Remove spinner since we're done
         if($scope.loading){
             $scope.loading.hide();
         }
     };
+
+    // Request towers from mobile.php
     $scope.towerReq = function(){
+        // Build the request parameters. The 'if' is to cover no uuid yet.
         if($scope.uuid){
             var queryString = encodeURI("record="+$scope.uuid+"&geo="+$scope.data.loc.lat+","+$scope.data.loc.lng+"&uid="+$scope.maddr.val);
         }
@@ -89,6 +123,8 @@ angular.module('tower.controllers', ['starter.controllers'])
         }
         $http.post("https://sales.jabtools.com/ajax/mobile_v011.php",queryString, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then($scope.pResp, $scope.onFail);
     };
+
+    // Break apart the result "string" that is sent back
     $scope.pResp = function(resp){
         var qualString = resp.data.split("QUAL:")[1]; qualString = qualString.substr(0, qualString.search("\nTOWER:"));
         alert(qualString);
@@ -96,17 +132,22 @@ angular.module('tower.controllers', ['starter.controllers'])
         $scope.qualParse(qualString);
         angular.forEach(towers, $scope.towerPlot);
     };
+
+    // Parse the qualification string sent back
     $scope.qualParse = function(qualString){
         var data = qualString.split(":");
         alert(JSON.stringify(data));
+        // If no uuid for lead yet, grab the record. Otherwise, just throw it away.
         if(!$scope.uuid) $scope.uuid = data.shift();
         else data.shift();
+        // If not qualified, do this
         if(!data[0] || data[0] == "None"){
             $scope.qual = "No qualifications"
             $scope.data.qual.levels = [];
             $scope.data.qual.los = "No Viewshed LOS or LTE service found";
         }
         else{
+            // If qualified, grab the level of qualification and LOS.
             $scope.qual = data[0];
             var plans = $scope.qual.split(", ");
             $scope.data.plans = plans[0];
@@ -114,8 +155,11 @@ angular.module('tower.controllers', ['starter.controllers'])
             $scope.data.qual.los = data[1].split(" ").slice(0,-1).join(" ");
         }
     };
+
+    // Parse the tower string sent
     $scope.towerPlot = function(towerString){
         var data = towerString.split(":");
+        // Check service from the tower and pick a color
         if (data[4] == "N/A"){
             var color = "#535353";
         } else if(data[4] == "No"){
@@ -123,6 +167,7 @@ angular.module('tower.controllers', ['starter.controllers'])
         } else {
             var color = "#00FF00";
         }
+        //Draw a line to the tower, paint it, and give the tower an icon.
         var newLine = new google.maps.Polyline({
             path: [$scope.data.loc, {lat: +data[1], lng: +data[2]}],
             icons:[{
@@ -132,13 +177,18 @@ angular.module('tower.controllers', ['starter.controllers'])
             strokeColor: color,
             map: $scope.map
         });
+        //Create the label for the tower
         var newLabel = new google.maps.InfoWindow({
             content: data[0],
             position: {lat: +data[1], lng: +data[2]}
         });
+        // Show label and set target heading when the tower is selected
         google.maps.event.addListener(newLine, 'click', function(e){
+            // Show label
             newLabel.open($scope.map);
+            // Set target heading
             $scope.heading.goal = (google.maps.geometry.spherical.computeHeading(new google.maps.LatLng($scope.data.loc), new google.maps.LatLng(+data[1], +data[2])) + 360) % 360;
+            // Check if we're looking in that direction
             if ((Math.abs($scope.heading.trueHeading - $scope.heading.goal) <= 5) || (360 - Math.abs($scope.heading.trueHeading - $scope.heading.goal) <= 5)) {
                 angular.element(document.getElementById('shiny')).css('color',"#00ff00");
             }
@@ -146,14 +196,17 @@ angular.module('tower.controllers', ['starter.controllers'])
                 angular.element(document.getElementById('shiny')).css('color',"#ffffff");
             }
         });
+        // Store a reference to the tower
         $scope.towers.lines.push(newLine);
         $scope.towers.labels.push(newLabel);
     };
+
+    //Clean up code. Stop following device heading and stop insomnia's keepawake.
     $scope.$on("$destroy", function(){
-        if($scope.watcher){
-            clearInterval($scope.watcher);
+        if($scope.watch){
+            $cordovaDeviceOrientation.clearWatch($scope.watch);
         }
-        if (window.plugins.insomnia){
+        if (window.plugins && window.plugins.insomnia){
             window.plugins.insomnia.allowSleepAgain();
         }
     });
