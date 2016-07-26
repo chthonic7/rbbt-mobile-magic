@@ -1,4 +1,4 @@
-angular.module('starter', ['ionic', 'map.controllers', 'qual.controllers', 'info.controllers', 'review.controller', 'starter.directives'])
+angular.module('starter', ['ionic', 'map.controllers', 'tower.controllers', 'qual.controllers', 'info.controllers', 'review.controller', 'starter.directives'])
 
 .run(function($ionicPlatform, $rootScope, $state, $stateParams) {
     $rootScope.$state = $state;
@@ -21,6 +21,14 @@ angular.module('starter', ['ionic', 'map.controllers', 'qual.controllers', 'info
             views:{
                 'menuContent': {
                     templateUrl: 'templates/login.html'
+                }
+            }
+        })
+        .state('app.tower',{
+            url: '/tower',
+            views:{
+                'menuContent': {
+                    templateUrl: 'templates/tower.html'
                 }
             }
         })

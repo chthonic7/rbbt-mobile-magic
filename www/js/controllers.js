@@ -26,6 +26,7 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         }
     };
     $scope.minDate = new Date();
+    $scope.uuid = "m001579140ca7fb437.48201850";
     $scope.qual = "Qualification pending...";
     $scope.roaming = {value: false};
     $ionicPlatform.ready(function() {
@@ -35,6 +36,7 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
             }, function(err){alert(err);});
         }
         else{
+            $scope.maddr = {val: ""};
             alert("Cannot obtain MAC address");
         }
     });
@@ -47,7 +49,7 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         else{
             var queryString = encodeURI("geo="+$scope.data.loc.lat+","+$scope.data.loc.lng+"&uid="+$scope.maddr.val);
         }
-        $http.post("https://sales.jabtools.com/ajax/mobile.php",queryString, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then($scope.parseResp, $scope.onFail);
+        $http.post("https://sales.jabtools.com/ajax/mobile_v011.php",queryString, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then($scope.parseResp, $scope.onFail);
     };
 
     $scope.addrResp = function(resp){
@@ -78,23 +80,11 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
     };
 
     $scope.parseResp = function(resp){
-        var data = resp.data.split(" ");
-        if(!$scope.uuid) $scope.uuid = data.shift();
-        else data.shift();
-        data.pop();
-        if(!data){
-            $scope.qual = "No qualifications"
-            $scope.data.qual.levels = [];
-            $scope.data.qual.los = "No Viewshed LOS or LTE service found";
-        }
-        else{
-            $scope.qual = data.join(" ").split(":")[0];
-            var plans = $scope.qual.split(", ");
-            // $scope.plans = {selected: plans.slice(0,1), options: plans};
-            $scope.data.plans = plans.slice(0,1);
-            $scope.data.qual.levels = plans;
-            $scope.data.qual.los = data.join(" ").split(":")[1];
-        }
+        var qualString = resp.data.split("QUAL:")[1]; qualString = qualString.substr(0, qualString.search("\nTOWER:"));
+        alert(qualString);
+        var towers = resp.data.split("\nTOWER:").slice(1);
+        $scope.qualParse(qualString);
+        // angular.forEach(towers, $scope.towerPlot);
     };
 
     $scope.save = function(){

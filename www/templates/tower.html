@@ -1,15 +1,13 @@
-<ion-view view-title="Map" ng-controller="mapCtrl">
+<ion-view view-title="Towers" ng-controller="twrCtrl">
   <ion-header-bar class="bar-dark">
     <button menu-toggle="left" class="button button-icon icon ion-navicon"></button>
-    <h1 class="title">
-      Qualify your Location
-    </h1>
+    Goal: <span ng-bind="heading.goal"></span>&nbsp;
+    <div id="shiny">Heading: <span ng-bind="heading.trueHeading"></span></div>
   </ion-header-bar>
   <ion-content class="has-header has-footer" scroll="false">
     <map on-create="mapCreated(map)"> </map>
   </ion-content>
   <ion-footer-bar class="bar-dark">
-    <a ng-show="!roaming.value" ng-click="centerOnMe()" class="button button-icon icon ">Recenter</a>
-    <a href="#/app/qual" ng-click="sendAReq()" class="button button-icon icon">Qualify</a>
+    <div ng-click="towerReq()" class="button button-icon icon">Towerify</div>
   </ion-footer-bar>
 </ion-view>
