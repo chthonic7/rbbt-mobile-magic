@@ -42,11 +42,11 @@ angular.module('map.controllers', ['starter.controllers'])
         if (!$scope.map) {
             return;
         }
-        $scope.loading = $ionicLoading.show({
-            content: 'Getting current location...',
+        $ionicLoading.show({
+            template: 'Getting current location...',
 
         });
-        navigator.geolocation.getCurrentPosition($scope.onUpdateSucc, function(error){alert("Couldn't establish location");});
+        navigator.geolocation.getCurrentPosition($scope.onUpdateSucc, function(error){alert("Couldn't establish location");$ionicLoading.hide();});
     };
 
     $scope.sendAReq = function(){
@@ -61,9 +61,7 @@ angular.module('map.controllers', ['starter.controllers'])
         var newPos = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
         $scope.map.setCenter(newPos);
         $scope.marker.setPosition(newPos);
-        if($scope.loading){
-            $scope.loading.hide();
-        }
+        $ionicLoading.hide();
         if ((Math.abs($scope.data.loc.lat - pos.coords.latitude) > .0005) || (Math.abs($scope.data.loc.lng - pos.coords.longitude) > .0005)){
             $scope.$apply(function(){
                 $scope.data.loc.lat = pos.coords.latitude;

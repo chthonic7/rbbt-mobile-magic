@@ -82,11 +82,11 @@ angular.module('tower.controllers', ['starter.controllers'])
         }
 
         // Display spinner while gps is working
-        $scope.loading = $ionicLoading.show({
-            content: 'Getting current location...',
+        $ionicLoading.show({
+            template: 'Getting current location...',
 
         });
-        navigator.geolocation.getCurrentPosition($scope.onUpdateSucc, function(error){alert("Couldn't establish location");});
+        navigator.geolocation.getCurrentPosition($scope.onUpdateSucc, function(error){alert("Couldn't establish location");$ionicLoading.hide();});
     };
 
     // When we get a new lat/long, center map at loc and place marker there. Also update heading.decl
@@ -104,9 +104,7 @@ angular.module('tower.controllers', ['starter.controllers'])
             $scope.heading.decl = geomagnetism.model().point([pos.coords.latitude, pos.coords.longitude]).decl;
         });
         //Remove spinner since we're done
-        if($scope.loading){
-            $scope.loading.hide();
-        }
+        $ionicLoading.hide();
     };
 
     // Request towers from mobile.php
