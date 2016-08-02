@@ -127,7 +127,7 @@ angular.module('tower.controllers', ['starter.controllers'])
     // Break apart the result "string" that is sent back
     $scope.pResp = function(resp){
         var qualString = resp.data.split("QUAL:")[1]; qualString = qualString.substr(0, qualString.search("\nTOWER:"));
-        alert(qualString);
+        // alert(qualString);
         var towers = resp.data.split("\nTOWER:").slice(1);
         $scope.qualParse(qualString);
         angular.forEach(towers, $scope.towerPlot);
@@ -136,7 +136,7 @@ angular.module('tower.controllers', ['starter.controllers'])
     // Parse the qualification string sent back
     $scope.qualParse = function(qualString){
         var data = qualString.split(":");
-        alert(JSON.stringify(data));
+        // alert(JSON.stringify(data));
         // If no uuid for lead yet, grab the record. Otherwise, just throw it away.
         if(!$scope.uuid) $scope.uuid = data.shift();
         else data.shift();
@@ -150,7 +150,7 @@ angular.module('tower.controllers', ['starter.controllers'])
             // If qualified, grab the level of qualification and LOS.
             $scope.qual = data[0];
             var plans = $scope.qual.split(", ");
-            $scope.data.plans = plans[0];
+            $scope.data.plans = [plans[0]];
             $scope.data.qual.levels = plans;
             $scope.data.qual.los = data[1].split(" ").slice(0,-1).join(" ");
         }
@@ -188,6 +188,11 @@ angular.module('tower.controllers', ['starter.controllers'])
             newLabel.open($scope.map);
             // Set target heading
             $scope.heading.goal = (google.maps.geometry.spherical.computeHeading(new google.maps.LatLng($scope.data.loc), new google.maps.LatLng(+data[1], +data[2])) + 360) % 360;
+            // Rescale map
+            var bounds = new google.maps.LatLngBounds();
+            bounds.extend(new google.maps.LatLng($scope.data.loc));
+            bounds.extend(new google.maps.LatLng(+data[1], +data[2]));
+            $scope.map.fitBounds(bounds);
             // Check if we're looking in that direction
             if ((Math.abs($scope.heading.trueHeading - $scope.heading.goal) <= 5) || (360 - Math.abs($scope.heading.trueHeading - $scope.heading.goal) <= 5)) {
                 angular.element(document.getElementById('shiny')).css('color',"#00ff00");

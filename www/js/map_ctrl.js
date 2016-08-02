@@ -38,7 +38,7 @@ angular.module('map.controllers', ['starter.controllers'])
                 }
             }
         });
-        // $scope.centerOnMe();
+        $scope.centerOnMe();
     };
 
     $scope.centerOnMe = function () {

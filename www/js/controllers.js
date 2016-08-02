@@ -81,10 +81,33 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
 
     $scope.parseResp = function(resp){
         var qualString = resp.data.split("QUAL:")[1]; qualString = qualString.substr(0, qualString.search("\nTOWER:"));
-        alert(qualString);
+        // alert(qualString);
         var towers = resp.data.split("\nTOWER:").slice(1);
         $scope.qualParse(qualString);
         // angular.forEach(towers, $scope.towerPlot);
+    };
+
+    // Parse the qualification string sent back
+    $scope.qualParse = function(qualString){
+        var data = qualString.split(":");
+        // alert(JSON.stringify(data));
+        // If no uuid for lead yet, grab the record. Otherwise, just throw it away.
+        if(!$scope.uuid) $scope.uuid = data.shift();
+        else data.shift();
+        // If not qualified, do this
+        if(!data[0] || data[0] == "None"){
+            $scope.qual = "No qualifications"
+            $scope.data.qual.levels = [];
+            $scope.data.qual.los = "No Viewshed LOS or LTE service found";
+        }
+        else{
+            // If qualified, grab the level of qualification and LOS.
+            $scope.qual = data[0];
+            var plans = $scope.qual.split(", ");
+            $scope.data.plans = [plans[0]];
+            $scope.data.qual.levels = plans;
+            $scope.data.qual.los = data[1].split(" ").slice(0,-1).join(" ");
+        }
     };
 
     $scope.save = function(){

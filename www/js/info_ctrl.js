@@ -1,5 +1,5 @@
 angular.module('info.controllers', ['starter.controllers'])
-.controller('infoCtrl', function($scope, $state, $cordovaFile, $http) {
+.controller('infoCtrl', function($scope, $state, $cordovaFile, $http, $filter) {
     $scope.reGeo = function(){
         $scope.data.addr.street = "";
         $scope.data.addr.city = "";
