@@ -1,12 +1,9 @@
 angular.module('tower.controllers', ['starter.controllers'])
-.controller('twrCtrl', function($scope, $ionicLoading, $ionicPlatform, $cordovaDeviceOrientation, $http) {
+.controller('twrCtrl', function($scope, $ionicLoading, $ionicPlatform, $cordovaDeviceOrientation, $http, $ionicModal, $filter) {
     // Prevent the phone from going to sleep
     $ionicPlatform.ready(function() {
         if(window.plugins && window.plugins.insomnia) {
             window.plugins.insomnia.keepAwake();
-        }
-        else{
-            alert("Plugin Insomnia not loaded!");
         }
     });
 
@@ -136,7 +133,6 @@ angular.module('tower.controllers', ['starter.controllers'])
     // Parse the qualification string sent back
     $scope.qualParse = function(qualString){
         var data = qualString.split(":");
-        // alert(JSON.stringify(data));
         // If no uuid for lead yet, grab the record. Otherwise, just throw it away.
         if(!$scope.uuid) $scope.uuid = data.shift();
         else data.shift();
@@ -156,16 +152,16 @@ angular.module('tower.controllers', ['starter.controllers'])
         }
     };
 
-    // Parse the tower string sent
+    // Parse the tower string sent (TODO)and create stuff
     $scope.towerPlot = function(towerString){
         var data = towerString.split(":");
         // Check service from the tower and pick a color
         if (data[4] == "N/A"){
-            var color = "#535353";
+            var color = "#A9A9A9";
         } else if(data[4] == "No"){
-            var color = "#FF0000";
+            var color = "#EE0000";
         } else {
-            var color = "#00FF00";
+            var color = "#009400";
         }
         //Draw a line to the tower, paint it, and give the tower an icon.
         var newLine = new google.maps.Polyline({
@@ -182,12 +178,32 @@ angular.module('tower.controllers', ['starter.controllers'])
             content: data[0],
             position: {lat: +data[1], lng: +data[2]}
         });
+        // Set up Modals for each tower
+        var tscope = $scope.$new(true);
+        tscope.name = data[0];
+        tscope.items = {service: data[4], coordinates: $filter('number')(+data[1], 5)+", "+$filter('number')(+data[2], 5)};
+        var newModal;
+        $ionicModal.fromTemplateUrl('templates/tower_info.html', {
+            scope: tscope,
+            animation: 'slide-in-up'
+        }).then(function(modal){
+            newModal = modal;
+            tscope.close = function() {newModal.hide();};
+            var el = document.createElement('div')
+            el.innerHTML = data[0];
+            el.onclick = function(){
+                newModal.show();
+            };
+            newLabel.setContent(el);
+        });
+
         // Show label and set target heading when the tower is selected
         google.maps.event.addListener(newLine, 'click', function(e){
             // Show label
             newLabel.open($scope.map);
             // Set target heading
             $scope.heading.goal = (google.maps.geometry.spherical.computeHeading(new google.maps.LatLng($scope.data.loc), new google.maps.LatLng(+data[1], +data[2])) + 360) % 360;
+            tscope.items.direction = $filter('number')($scope.heading.goal);
             // Rescale map
             var bounds = new google.maps.LatLngBounds();
             bounds.extend(new google.maps.LatLng($scope.data.loc));

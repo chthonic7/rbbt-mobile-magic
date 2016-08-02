@@ -11,12 +11,7 @@ angular.module('starter', ['ionic', 'map.controllers', 'tower.controllers', 'qua
 })
 .config(function($stateProvider, $urlRouterProvider,$httpProvider){
     $stateProvider
-        .state('app',{
-            url: "/app",
-            abstract: true,
-            templateUrl: "templates/menu.html"
-        })
-        .state('app.login',{
+        .state('login',{
             url: '/login',
             views:{
                 'menuContent': {
@@ -24,7 +19,7 @@ angular.module('starter', ['ionic', 'map.controllers', 'tower.controllers', 'qua
                 }
             }
         })
-        .state('app.tower',{
+        .state('tower',{
             url: '/tower',
             views:{
                 'menuContent': {
@@ -32,7 +27,15 @@ angular.module('starter', ['ionic', 'map.controllers', 'tower.controllers', 'qua
                 }
             }
         })
-        .state('app.map',{
+        .state('tower.info',{
+            url: '/info',
+            views:{
+                'menuContent': {
+                    templateUrl: 'templates/tower_info.html'
+                }
+            }
+        })
+        .state('map',{
             url: '/map',
             views:{
                 'menuContent': {
@@ -40,7 +43,7 @@ angular.module('starter', ['ionic', 'map.controllers', 'tower.controllers', 'qua
                 }
             }
         })
-        .state('app.qual',{
+        .state('qual',{
             url: '/qual',
             views:{
                 'menuContent': {
@@ -48,7 +51,7 @@ angular.module('starter', ['ionic', 'map.controllers', 'tower.controllers', 'qua
                 }
             }
         })
-        .state('app.info',{
+        .state('info',{
             url: '/info',
             views:{
                 'menuContent': {
@@ -56,7 +59,7 @@ angular.module('starter', ['ionic', 'map.controllers', 'tower.controllers', 'qua
                 }
             }
         })
-        .state('app.review',{
+        .state('review',{
             url: '/review',
             views:{
                 'menuContent': {
@@ -64,6 +67,6 @@ angular.module('starter', ['ionic', 'map.controllers', 'tower.controllers', 'qua
                 }
             }
         });
-    $urlRouterProvider.otherwise('/app/map');
+    $urlRouterProvider.otherwise('/map');
 })
 

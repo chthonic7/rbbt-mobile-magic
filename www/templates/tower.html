@@ -1,7 +1,7 @@
 <ion-view view-title="Towers" ng-controller="twrCtrl">
   <ion-header-bar class="bar-dark">
     <button menu-toggle="left" class="button button-icon icon ion-navicon"></button>
-    Goal: <span ng-bind="heading.goal"></span>&nbsp;
+    Goal: {{heading.goal | number}}&nbsp;
     <div id="shiny">Heading: <span ng-bind="heading.trueHeading"></span></div>
   </ion-header-bar>
   <ion-content class="has-header has-footer" scroll="false">

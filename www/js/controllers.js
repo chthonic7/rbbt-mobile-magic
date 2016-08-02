@@ -16,7 +16,7 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
             los: "",
         },
         plans: [],
-        date: $filter("date")(new Date(), 'yyyy-MM-dd'),
+        date: new Date(),
         cust:{
             fname: "",
             lname: "",
@@ -30,14 +30,16 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
     $scope.qual = "Qualification pending...";
     $scope.roaming = {value: false};
     $ionicPlatform.ready(function() {
-        if(window.MacAddress) {
-            MacAddress.getMacAddress(function(maddr){
-                $scope.maddr = {val: maddr};
-            }, function(err){alert(err);});
-        }
-        else{
-            $scope.maddr = {val: ""};
-            alert("Cannot obtain MAC address");
+        if(!$scope.maddr){
+            if(window.MacAddress) {
+                MacAddress.getMacAddress(function(maddr){
+                    $scope.maddr = {val: maddr};
+                }, function(err){alert(err);});
+            }
+            else{
+                $scope.maddr = {val: ""};
+                alert("Cannot obtain MAC address");
+            }
         }
     });
 
@@ -84,7 +86,6 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         // alert(qualString);
         var towers = resp.data.split("\nTOWER:").slice(1);
         $scope.qualParse(qualString);
-        // angular.forEach(towers, $scope.towerPlot);
     };
 
     // Parse the qualification string sent back
@@ -110,33 +111,33 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         }
     };
 
-    $scope.save = function(){
-        $ionicPlatform.ready(function(){
-            if(window.cordova && window.cordova.file){
-                $cordovaFile.checkFile(cordova.file.dataDirectory, "lederhosen.hist").then(
-                    function(){
-                        $cordovaFile.writeExistingFile(corova.file.dataDirectory, "lederhosen.hist", JSON.stringify($scope.data)+"\n").then(function(){alert("ya");}, function(){alert("na");});
-                    },
-                    function(){
-                        $cordovaFile.writeFile(corova.file.dataDirectory, "lederhosen.hist", JSON.stringify($scope.data)+"\n", true).then(function(){alert("yah");}, function(){alert("nah");});
-                    });
-            }
-        });
-    };
+    // $scope.save = function(){
+    //     $ionicPlatform.ready(function(){
+    //         if(window.cordova && window.cordova.file){
+    //             $cordovaFile.checkFile(cordova.file.dataDirectory, "lederhosen.hist").then(
+    //                 function(){
+    //                     $cordovaFile.writeExistingFile(corova.file.dataDirectory, "lederhosen.hist", JSON.stringify($scope.data)+"\n").then(function(){alert("ya");}, function(){alert("na");});
+    //                 },
+    //                 function(){
+    //                     $cordovaFile.writeFile(corova.file.dataDirectory, "lederhosen.hist", JSON.stringify($scope.data)+"\n", true).then(function(){alert("yah");}, function(){alert("nah");});
+    //                 });
+    //         }
+    //     });
+    // };
 
-    $scope.load = function(){
-        var data = [];
-        $ionicPlatform.ready(function(){
-            if(window.cordova && window.cordova.file){
-                $cordovaFile.readAsText(corova.file.dataDirectory, "leads.hist").then(function(result){
-                    angular.forEach(result.split("\n"), function(value){
-                        data.push(JSON.parse(value));
-                    })
-                });
-            }
-        });
-        return data;
-    };
+    // $scope.load = function(){
+    //     var data = [];
+    //     $ionicPlatform.ready(function(){
+    //         if(window.cordova && window.cordova.file){
+    //             $cordovaFile.readAsText(corova.file.dataDirectory, "leads.hist").then(function(result){
+    //                 angular.forEach(result.split("\n"), function(value){
+    //                     data.push(JSON.parse(value));
+    //                 })
+    //             });
+    //         }
+    //     });
+    //     return data;
+    // };
 
     $scope.onFail = function (error){
         alert('Error: ' + JSON.stringify(error));
@@ -162,7 +163,7 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         $scope.data.qual.levels = [];
         $scope.data.qual.los = "";
         $scope.data.plans = [];
-        $scope.data.date = $filter("date")(new Date(), 'yyyy-MM-dd');
+        $scope.data.date = new Date();
         $scope.data.cust.fname = "";
         $scope.data.cust.lname = "";
         $scope.data.cust.phone = "";
@@ -179,9 +180,9 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         $scope.data.qual.levels = [];
         $scope.data.qual.los = "";
         $scope.data.plans = [];
-        $scope.data.date = $filter("date")(new Date(), 'yyyy-MM-dd');
+        $scope.data.date = new Date();
         $scope.qual = "Qualification pending...";
-        $state.go('app.map');
+        $state.go('map');
     };
 
     $scope.reQual = function(){
@@ -190,26 +191,26 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         $scope.data.cust.phone = "";
         $scope.data.cust.email = "";
         $scope.data.cust.notes = "";
-        $state.go('app.qual');
+        $state.go('qual');
     };
 
     $ionicPlatform.registerBackButtonAction(function(){
         switch($state.current.name){
-        case 'app.map':
+        case 'map':
             ionic.Platform.exitApp();
             break;
-        case 'app.tower':
-        case 'app.login':
-            $state.go('app.map');
+        case 'tower':
+        case 'login':
+            $state.go('map');
             break;
-        case 'app.qual':
+        case 'qual':
             $scope.reGeo();
             break;
-        case 'app.info':
+        case 'info':
             $scope.reQual();
             break;
-        case 'app.review':
-            $state.go('app.info');
+        case 'review':
+            $state.go('info');
             break;
         }
     }, 101);

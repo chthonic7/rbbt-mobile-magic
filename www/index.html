@@ -14,7 +14,6 @@
 
     <!-- ionic/angularjs js -->
     <script src="lib/ionic/js/ionic.bundle.js"></script>
-    <script src="lib/moment/moment.js"></script>
     
     <script src="https://maps.googleapis.com/maps/api/js"></script>
 
@@ -38,7 +37,41 @@
 
   <body ng-app="starter" ng-controller="mainCtrl">
 
-    <ion-nav-view></ion-nav-view>
+    <ion-side-menus enable-menu-with-back-views="true">
+      <ion-side-menu side="left">
+        <header class="bar bar-header bar-assertive">
+          <h1 class="title">Options</h1>
+        </header>
+        <subheader class="bar bar-subheader">
+          Logged in as: guest
+        </subheader>
+        <ion-content class="has-header has-subheader">
+          <ion-list>
+            <ion-toggle ng-show="$state.is('app.map')" ng-model="roaming.value" toggle-class="toggle-calm">Roaming</ion-toggle>
+            <ion-item nav-clear menu-close ng-click="resetId()" ng-href="#/map">
+              New Lead
+            </ion-item>
+            <ion-item nav-clear menu-close href="#/tower">
+              Find Tower
+            </ion-item>
+            <ion-item nav-clear menu-close href="#/login">
+              Log In
+            </ion-item>
+            <ion-item nav-clear menu-close ng-click="selfieTime()">
+              First Let Me Take a Selfie
+            </ion-item>
+          </ion-list>
+        </ion-content>
+      </ion-side-menu>
+      <ion-side-menu-content>
+        <ion-nav-bar class="bar-dark">
+          <ion-nav-buttons side="left">
+            <button menu-toggle="left" class="button button-icon icon ion-navicon"></button>
+          </ion-nav-buttons>
+        </ion-nav-bar>
+        <ion-nav-view name="menuContent"></ion-nav-view>
+      </ion-side-menu-content>
+    </ion-side-menus>
 
   </body>
 </html>

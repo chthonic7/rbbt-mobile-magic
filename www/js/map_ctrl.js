@@ -4,9 +4,6 @@ angular.module('map.controllers', ['starter.controllers'])
         if(window.plugins && window.plugins.insomnia) {
             window.plugins.insomnia.keepAwake();
         }
-        else{
-            alert("Plugin Insomnia not loaded!");
-        }
     });
     $scope.mapCreated = function(map) {
         $scope.map = map;

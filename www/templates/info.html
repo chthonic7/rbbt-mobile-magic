@@ -1,10 +1,4 @@
-<ion-view view-title="Customer Info" ng-controller="infoCtrl">
-  <ion-header-bar class="bar-dark">
-    <button menu-toggle="left" class="button button-icon icon ion-navicon"></button>
-    <h1 class="title">
-      Customer Information
-    </h1>
-  </ion-header-bar>
+<ion-view view-title="Customer Information" ng-controller="infoCtrl">
   <ion-content class="has-header has-footer">
     <div class="list card">
       <div class="item item-body">
@@ -26,26 +20,21 @@
         <div class="item item-body">
           <ul class="list">
             <li class="row">
-              <div class="col-20">
-                Name:
+              <div class="col item-input">
+                <input ng-model="data.cust.fname" type="text" placeholder="First Name">
               </div>
-              <div class="col item item-input">
-                <input ng-model="data.cust.fname" type="text">
-              </div>
-              <div class="col item item-input">
-                <input ng-model="data.cust.lname" type="text">
+              <div class="col item-input">
+                <input ng-model="data.cust.lname" type="text" placeholder="Last Name">
               </div>
             </li>
             <li class="item item-input">
-              Phone:
-              <input ng-model="data.cust.phone" type="tel">
+              <input ng-model="data.cust.phone" type="tel" placeholder="Phone">
             </li>
             <li class="item item-input">
-              Email:
-              <input ng-model="data.cust.email" type="email">
+              <input ng-model="data.cust.email" type="email" placeholder="Email">
             </li>
             <li class="item item-text-wrap">
-              {{data.plans.join(', ')}} with an initial install date on {{data.date}}.
+              {{data.plans.join(', ')}} with an initial install date on {{data.date | date: 'MM/dd/yyyy'}}.
             </li>
             <li class="item item-input">
               <textarea ng-model="data.cust.notes" rows="5" placeholder="Additional notes"></textarea>
