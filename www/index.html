@@ -43,7 +43,7 @@
           <h1 class="title">Options</h1>
         </header>
         <subheader class="bar bar-subheader">
-          Logged in as: guest
+          Logged in as: {{user.name}}
         </subheader>
         <ion-content class="has-header has-subheader">
           <ion-list>
@@ -54,7 +54,7 @@
             <ion-item nav-clear menu-close href="#/tower">
               Find Tower
             </ion-item>
-            <ion-item nav-clear menu-close href="#/login">
+            <ion-item nav-clear menu-close ng-click="loginModal.show()">
               Log In
             </ion-item>
             <ion-item nav-clear menu-close ng-click="selfieTime()">

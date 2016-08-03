@@ -1,5 +1,5 @@
 angular.module('starter.controllers', ['ui.router', 'ngCordova'])
-.controller('mainCtrl', function($scope, $state, $cordovaFile, $ionicPlatform, $http, $filter, $cordovaCamera) {
+.controller('mainCtrl', function($scope, $state, $cordovaFile, $ionicPlatform, $http, $filter, $cordovaCamera, $ionicModal) {
     $scope.data={
         loc:{
             lat: 39.5784168,
@@ -29,6 +29,21 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
     $scope.uuid = "m001579140ca7fb437.48201850";
     $scope.qual = "Qualification pending...";
     $scope.roaming = {value: false};
+    $scope.user = {name: 'guest', pass: ''};
+    $scope.luser = {name: 'guest', pass: ''};
+    $ionicModal.fromTemplateUrl('templates/login.html', {
+        scope: $scope,
+        animation: 'slide-in-down'
+    }).then(function(modal){
+        $scope.loginModal = modal;
+    });
+    $scope.do_login = function(){
+        $scope.user.name = $scope.luser.name;
+        $scope.user.pass = $scope.luser.pass;
+        $scope.luser.pass = '';
+        $scope.loginModal.hide();
+    };
+
     $ionicPlatform.ready(function() {
         if(!$scope.maddr){
             if(window.MacAddress) {

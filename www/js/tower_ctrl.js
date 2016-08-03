@@ -125,6 +125,7 @@ angular.module('tower.controllers', ['starter.controllers'])
         // alert(qualString);
         var towers = resp.data.split("\nTOWER:").slice(1);
         $scope.qualParse(qualString);
+        $scope.clearTowers();
         angular.forEach(towers, $scope.towerPlot);
     };
 
@@ -220,6 +221,14 @@ angular.module('tower.controllers', ['starter.controllers'])
         $scope.towers.labels.push(newLabel);
     };
 
+    $scope.clearTowers = function(){
+        angular.forEach($scope.towers.lines, function(val){val.setMap(null);});
+        angular.forEach($scope.towers.labels, function(val){val.close();});
+        delete $scope.towers.lines;
+        delete $scope.towers.labels;
+        $scope.towers.lines = [];
+        $scope.towers.labels = [];
+    };
     //Clean up code. Stop following device heading and stop insomnia's keepawake.
     $scope.$on("$destroy", function(){
         if($scope.watch){
