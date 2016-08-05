@@ -1,0 +1,11 @@
+<ion-view ng-controller="twrCtrl">
+  <ion-nav-title>
+    Target: {{heading.goal | number}} <span id="shiny">Heading: {{heading.trueHeading | number}}</span>
+  </ion-nav-title>
+  <ion-content class="has-header has-footer" scroll="false">
+    <map on-create="mapCreated(map)"> </map>
+  </ion-content>
+  <ion-footer-bar class="bar-dark">
+    <div ng-click="towerReq()" class="button button-icon icon">Find Towers</div>
+  </ion-footer-bar>
+</ion-view>

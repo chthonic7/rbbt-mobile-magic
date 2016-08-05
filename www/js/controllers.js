@@ -1,5 +1,5 @@
 angular.module('starter.controllers', ['ui.router', 'ngCordova'])
-.controller('mainCtrl', function($scope, $state, $cordovaFile, $ionicPlatform, $http, $filter, $cordovaCamera) {
+.controller('mainCtrl', function($scope, $state, $cordovaFile, $ionicPlatform, $http, $filter, $cordovaCamera, $ionicModal) {
     $scope.data={
         loc:{
             lat: 39.5784168,
@@ -16,7 +16,7 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
             los: "",
         },
         plans: [],
-        date: $filter("date")(new Date(), 'yyyy-MM-dd'),
+        date: new Date(),
         cust:{
             fname: "",
             lname: "",
@@ -26,16 +26,35 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         }
     };
     $scope.minDate = new Date();
+    $scope.uuid = "m001579140ca7fb437.48201850";
     $scope.qual = "Qualification pending...";
     $scope.roaming = {value: false};
+    $scope.user = {name: 'guest', pass: ''};
+    $scope.luser = {name: 'guest', pass: ''};
+    $ionicModal.fromTemplateUrl('templates/login.html', {
+        scope: $scope,
+        animation: 'slide-in-down'
+    }).then(function(modal){
+        $scope.loginModal = modal;
+    });
+    $scope.do_login = function(){
+        $scope.user.name = $scope.luser.name;
+        $scope.user.pass = $scope.luser.pass;
+        $scope.luser.pass = '';
+        $scope.loginModal.hide();
+    };
+
     $ionicPlatform.ready(function() {
-        if(window.MacAddress) {
-            MacAddress.getMacAddress(function(maddr){
-                $scope.maddr = {val: maddr};
-            }, function(err){alert(err);});
-        }
-        else{
-            alert("Cannot obtain MAC address");
+        if(!$scope.maddr){
+            if(window.MacAddress) {
+                MacAddress.getMacAddress(function(maddr){
+                    $scope.maddr = {val: maddr};
+                }, function(err){alert(err);});
+            }
+            else{
+                $scope.maddr = {val: ""};
+                alert("Cannot obtain MAC address");
+            }
         }
     });
 
@@ -47,7 +66,7 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         else{
             var queryString = encodeURI("geo="+$scope.data.loc.lat+","+$scope.data.loc.lng+"&uid="+$scope.maddr.val);
         }
-        $http.post("https://sales.jabtools.com/ajax/mobile.php",queryString, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then($scope.parseResp, $scope.onFail);
+        $http.post("https://sales.jabtools.com/ajax/mobile_v011.php",queryString, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then($scope.parseResp, $scope.onFail);
     };
 
     $scope.addrResp = function(resp){
@@ -78,52 +97,62 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
     };
 
     $scope.parseResp = function(resp){
-        var data = resp.data.split(" ");
+        var qualString = resp.data.split("QUAL:")[1]; qualString = qualString.substr(0, qualString.search("\nTOWER:"));
+        // alert(qualString);
+        var towers = resp.data.split("\nTOWER:").slice(1);
+        $scope.qualParse(qualString);
+    };
+
+    // Parse the qualification string sent back
+    $scope.qualParse = function(qualString){
+        var data = qualString.split(":");
+        // alert(JSON.stringify(data));
+        // If no uuid for lead yet, grab the record. Otherwise, just throw it away.
         if(!$scope.uuid) $scope.uuid = data.shift();
         else data.shift();
-        data.pop();
-        if(!data){
+        // If not qualified, do this
+        if(!data[0] || data[0] == "None"){
             $scope.qual = "No qualifications"
             $scope.data.qual.levels = [];
             $scope.data.qual.los = "No Viewshed LOS or LTE service found";
         }
         else{
-            $scope.qual = data.join(" ").split(":")[0];
+            // If qualified, grab the level of qualification and LOS.
+            $scope.qual = data[0];
             var plans = $scope.qual.split(", ");
-            // $scope.plans = {selected: plans.slice(0,1), options: plans};
-            $scope.data.plans = plans.slice(0,1);
+            $scope.data.plans = [plans[0]];
             $scope.data.qual.levels = plans;
-            $scope.data.qual.los = data.join(" ").split(":")[1];
+            $scope.data.qual.los = data[1].split(" ").slice(0,-1).join(" ");
         }
     };
 
-    $scope.save = function(){
-        $ionicPlatform.ready(function(){
-            if(window.cordova && window.cordova.file){
-                $cordovaFile.checkFile(cordova.file.dataDirectory, "lederhosen.hist").then(
-                    function(){
-                        $cordovaFile.writeExistingFile(corova.file.dataDirectory, "lederhosen.hist", JSON.stringify($scope.data)+"\n").then(function(){alert("ya");}, function(){alert("na");});
-                    },
-                    function(){
-                        $cordovaFile.writeFile(corova.file.dataDirectory, "lederhosen.hist", JSON.stringify($scope.data)+"\n", true).then(function(){alert("yah");}, function(){alert("nah");});
-                    });
-            }
-        });
-    };
+    // $scope.save = function(){
+    //     $ionicPlatform.ready(function(){
+    //         if(window.cordova && window.cordova.file){
+    //             $cordovaFile.checkFile(cordova.file.dataDirectory, "lederhosen.hist").then(
+    //                 function(){
+    //                     $cordovaFile.writeExistingFile(corova.file.dataDirectory, "lederhosen.hist", JSON.stringify($scope.data)+"\n").then(function(){alert("ya");}, function(){alert("na");});
+    //                 },
+    //                 function(){
+    //                     $cordovaFile.writeFile(corova.file.dataDirectory, "lederhosen.hist", JSON.stringify($scope.data)+"\n", true).then(function(){alert("yah");}, function(){alert("nah");});
+    //                 });
+    //         }
+    //     });
+    // };
 
-    $scope.load = function(){
-        var data = [];
-        $ionicPlatform.ready(function(){
-            if(window.cordova && window.cordova.file){
-                $cordovaFile.readAsText(corova.file.dataDirectory, "leads.hist").then(function(result){
-                    angular.forEach(result.split("\n"), function(value){
-                        data.push(JSON.parse(value));
-                    })
-                });
-            }
-        });
-        return data;
-    };
+    // $scope.load = function(){
+    //     var data = [];
+    //     $ionicPlatform.ready(function(){
+    //         if(window.cordova && window.cordova.file){
+    //             $cordovaFile.readAsText(corova.file.dataDirectory, "leads.hist").then(function(result){
+    //                 angular.forEach(result.split("\n"), function(value){
+    //                     data.push(JSON.parse(value));
+    //                 })
+    //             });
+    //         }
+    //     });
+    //     return data;
+    // };
 
     $scope.onFail = function (error){
         alert('Error: ' + JSON.stringify(error));
@@ -149,7 +178,7 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         $scope.data.qual.levels = [];
         $scope.data.qual.los = "";
         $scope.data.plans = [];
-        $scope.data.date = $filter("date")(new Date(), 'yyyy-MM-dd');
+        $scope.data.date = new Date();
         $scope.data.cust.fname = "";
         $scope.data.cust.lname = "";
         $scope.data.cust.phone = "";
@@ -166,9 +195,9 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         $scope.data.qual.levels = [];
         $scope.data.qual.los = "";
         $scope.data.plans = [];
-        $scope.data.date = $filter("date")(new Date(), 'yyyy-MM-dd');
+        $scope.data.date = new Date();
         $scope.qual = "Qualification pending...";
-        $state.go('app.map');
+        $state.go('map');
     };
 
     $scope.reQual = function(){
@@ -177,23 +206,27 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         $scope.data.cust.phone = "";
         $scope.data.cust.email = "";
         $scope.data.cust.notes = "";
-        $state.go('app.qual');
+        $state.go('qual');
     };
 
-    $ionicPlatform.onHardwareBackButton(function(){
+    $ionicPlatform.registerBackButtonAction(function(){
         switch($state.current.name){
-        case 'app.map':
+        case 'map':
             ionic.Platform.exitApp();
             break;
-        case 'app.qual':
+        case 'tower':
+        case 'login':
+            $state.go('map');
+            break;
+        case 'qual':
             $scope.reGeo();
             break;
-        case 'app.info':
+        case 'info':
             $scope.reQual();
             break;
-        case 'app.review':
-            $state.go('app.info');
+        case 'review':
+            $state.go('info');
             break;
         }
-    });
+    }, 101);
 });

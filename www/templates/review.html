@@ -8,7 +8,7 @@
       <ion-list type="card">
         <ion-item>Address: {{data.addr.street}}, {{data.addr.city}}, {{data.addr.state}} {{data.addr.postal}}</ion-item>
         <ion-item>Plans Selected: {{data.plans.join(", ")}}</ion-item>
-        <ion-item>Suggested Start Date: {{data.date}}</ion-item>
+        <ion-item>Suggested Start Date: {{data.date | date: 'MM/dd/yyyy'}}</ion-item>
         <ion-item>Name: {{data.cust.fname}} {{data.cust.lname}}</ion-item>
         <ion-item>Phone: {{data.cust.phone}}</ion-item>
         <ion-item>Email: {{data.cust.email}}</ion-item>
@@ -20,6 +20,6 @@
   <ion-footer-bar class="bar-dark">
     <a ng-click="reGeo()" class="button button-icon icon">Restart</a>
     <a ng-click="reQual()" class="button button-icon icon">Results</a>
-    <a ng-href="#/app/info" class="button button-icon icon">Info</a>
+    <a ng-href="#/info" class="button button-icon icon">Info</a>
   </ion-footer-bar>
 </ion-view>

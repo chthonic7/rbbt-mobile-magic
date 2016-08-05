@@ -1,45 +1,16 @@
 angular.module('map.controllers', ['starter.controllers'])
-.controller('mapCtrl', function($scope, $ionicLoading, $ionicPlatform, $cordovaDeviceOrientation) {
+.controller('mapCtrl', function($scope, $ionicLoading, $ionicPlatform, $cordovaDeviceOrientation, $http) {
     $ionicPlatform.ready(function() {
         if(window.plugins && window.plugins.insomnia) {
             window.plugins.insomnia.keepAwake();
         }
-        else{
-            alert("Plugin Insomnia not loaded!");
-        }
     });
     $scope.mapCreated = function(map) {
         $scope.map = map;
-        $scope.icon = {
-            path: "M 0,-6 3,6 0,1 -3,6 z",
-            fillColor: "#000",
-            fillOpacity: 1.0,
-            strokeWeight: 2,
-            rotation: 0
-        }
         $scope.marker = new google.maps.Marker({
             position: $scope.data.loc,
             animation: google.maps.Animation.DROP,
-            icon: $scope.icon,
             draggable: true,
-            map: $scope.map
-        });
-        $scope.line2 = new google.maps.Polyline({
-            path: [$scope.data.loc, {lat: 39.58, lng: -104.86}],
-            icons:[{
-                icon: {path: google.maps.SymbolPath.CIRCLE, fillOpacity: 1.0},
-                offset: '100%'
-            }],
-            strokeColor: '#00FF00',
-            map: $scope.map
-        });
-        $scope.line = new google.maps.Polyline({
-            path: [$scope.data.loc, {lat: 39.57, lng: -104.85}],
-            icons:[{
-                icon: {path: google.maps.SymbolPath.CIRCLE, fillOpacity: 1.0},
-                offset: '100%'
-            }],
-            strokeColor: '#FF0000',
             map: $scope.map
         });
         google.maps.event.addDomListener($scope.marker, 'dragend', function(e){
@@ -47,7 +18,6 @@ angular.module('map.controllers', ['starter.controllers'])
             $scope.$apply(function(){
                 $scope.data.loc.lat = pos.lat();
                 $scope.data.loc.lng = pos.lng();
-                $scope.heading.decl = geomagnetism.model().point([pos.lat(), pos.lng()]).decl;
             });
         });
         $scope.$watch("roaming.value", function(val){
@@ -68,35 +38,15 @@ angular.module('map.controllers', ['starter.controllers'])
         $scope.centerOnMe();
     };
 
-    $scope.heading = {
-        magHeading: 0,
-        trueHeading: 0,
-        decl: 0
-    };
-    $ionicPlatform.ready(function(){
-        $scope.watch = $cordovaDeviceOrientation.watchHeading().then(
-            null,
-            function(err){
-                alert(err);
-            },
-            function(result){
-                $scope.heading.magHeading = result.magneticHeading;
-                $scope.heading.trueHeading = ($scope.heading.magHeading + $scope.heading.decl + 360) % 360;
-                $scope.icon.rotation = $scope.heading.trueHeading;
-                $scope.marker.setIcon($scope.icon);
-            }
-        );
-    });
-
     $scope.centerOnMe = function () {
         if (!$scope.map) {
             return;
         }
-        $scope.loading = $ionicLoading.show({
-            content: 'Getting current location...',
+        $ionicLoading.show({
+            template: 'Getting current location...',
 
         });
-        navigator.geolocation.getCurrentPosition($scope.onUpdateSucc, function(error){alert("Couldn't establish location");});
+        navigator.geolocation.getCurrentPosition($scope.onUpdateSucc, function(error){alert("Couldn't establish location");$ionicLoading.hide();});
     };
 
     $scope.sendAReq = function(){
@@ -110,12 +60,8 @@ angular.module('map.controllers', ['starter.controllers'])
     $scope.onUpdateSucc = function(pos){
         var newPos = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
         $scope.map.setCenter(newPos);
-        $scope.$apply(function(){
-            $scope.heading.decl = geomagnetism.model().point([pos.coords.latitude, pos.coords.longitude]).decl;
-        });
-        if($scope.loading){
-            $scope.loading.hide();
-        }
+        $scope.marker.setPosition(newPos);
+        $ionicLoading.hide();
         if ((Math.abs($scope.data.loc.lat - pos.coords.latitude) > .0005) || (Math.abs($scope.data.loc.lng - pos.coords.longitude) > .0005)){
             $scope.$apply(function(){
                 $scope.data.loc.lat = pos.coords.latitude;
@@ -133,13 +79,13 @@ angular.module('map.controllers', ['starter.controllers'])
         else{
             var queryString = encodeURI("geo="+$scope.data.loc.lat+","+$scope.data.loc.lng+"&uid="+$scope.maddr.val);
         }
-        $http.post("https://sales.jabtools.com/ajax/mobile.php",queryString, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then($scope.parseResp, $scope.onFail);
+        $http.post("https://sales.jabtools.com/ajax/mobile_v011.php",queryString, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then($scope.parseResp, $scope.onFail);
     };
     $scope.$on("$destroy", function(){
         if($scope.watcher){
             clearInterval($scope.watcher);
         }
-        if (window.plugins.insomnia){
+        if (window.plugins && window.plugins.insomnia){
             window.plugins.insomnia.allowSleepAgain();
         }
     });
