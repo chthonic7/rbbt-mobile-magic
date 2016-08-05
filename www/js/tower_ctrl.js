@@ -6,6 +6,29 @@ angular.module('tower.controllers', ['starter.controllers'])
             window.plugins.insomnia.keepAwake();
         }
     });
+    // Symbols for subscribers later
+    $scope.blueDude = {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale:  4,
+        strokeColor: "#009BFF",
+        strokeWeight: 3
+    };
+    $scope.badSymbol = {
+        path: 'M -4,-4 4,4 M 4,-4 -4,4',
+        strokeColor: "#F00",
+        strokeWeight: 3
+    };
+    $scope.flakySymbol = {
+        path: 'M -4,-4 4,4 M 4,-4 -4,4',
+        strokeColor: "#A0A",
+        strokeWeight: 3
+    };
+    $scope.greenDude = {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale:  4,
+        strokeColor: "#0A0",
+        strokeWeight: 3
+    };
 
     // When the map is drawn, add a marker to the map and then automatically ask for towers.
     $scope.mapCreated = function(map) {
