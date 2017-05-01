@@ -1,4 +1,16 @@
-To restore the project, run `ionic state restore`, and this should set you up with everything.
+# Installing Ionic
+
+To install ionic, you should first have `npm` installed. Then, run:
+
+```
+sudo npm install -g cordova
+sudo npm install -g ionic
+```
+
+# Setting up the project
+To restore the project, first run `ionic state restore`.
+
+Then, run `bower install`. Note that this means you need `bower` installed.
 
 To run the project in the browser, run `ionic serve`.
 
