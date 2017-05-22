@@ -162,7 +162,7 @@ angular.module('tower.controllers', ['starter.controllers'])
       var devicestrings = resp.data.split("\nDEVICE:").slice(1);
       for(var i=0; i < devicestrings.length; i++){
         var data = devicestrings[i].split(':');
-        towers[data[0]].devices.push({bridger: data[1], color: data[2], azimuth: +data[3], frequency: data[4], technology: data[5], services: data[6], show:false});
+        towers[data[0]].devices.push({bridger: data[1], color: data[2], azimuth: +data[3], frequency: data[4], technology: data[5], services: data[6], beamwidth: +data[8], range: +data[9], show:false});
       }
       console.log(towers);
       $scope.qualParse(qualString);
@@ -275,57 +275,33 @@ angular.module('tower.controllers', ['starter.controllers'])
     $scope.createSubscope = function(tower) {
       var tscope = $scope.$new(true);
       tscope.name = name;
-      // Object.defineProperty(tscope, 'items', {
-      //   'get': function() {
-      //     var items = angular.copy(tower);
-      //     delete items.devices;
-      //     delete items.lat;
-      //     delete items.long;
-      //     return items;
-      //   }
-      // });
       tscope.items = angular.copy(tower); delete tscope.items.devices; delete tscope.items.lat; delete tscope.items.long;
       tscope.devices = tower.devices;
       tscope.sector = new google.maps.Polygon({
         path: [],
         map: $scope.map,
-        fillColor: 'red',
-        fillOpacity: 0.5,
+        fillColor: '#0000ff',
+        fillOpacity: 0.25,
+        strokeColor: '#000099',
+        strokeWeight: 2,
         zIndex: -1
       });
       tscope.towerLoc = new google.maps.LatLng(tower.lat, tower.long);
       tscope.toggleItem = function(item) {
         item.show = !item.show;
-        var point, points=[], end=(item.azimuth+420)%360;
-        for (var a=(item.azimuth+300)%360; a != end; a = (a+1)%360){
-          point = google.maps.geometry.spherical.computeOffset(tscope.towerLoc, 8000, a);
+        // Draw the sector for the device
+        var point, points=[];
+        var end=(item.azimuth + item.beamwidth/2 + 360) % 360;
+        var a=(item.azimuth - item.beamwidth/2 + 360) % 360;
+        var dist = item.range * 1609.34;
+        for (; a != end; a = (a+1)%360){
+          point = google.maps.geometry.spherical.computeOffset(tscope.towerLoc, dist, a);
           points.push(point);
         }
         points.push(tscope.towerLoc);
         tscope.sector.setPath(points);
       };
       return tscope;
-    };
-
-    $scope.drawSector = function(center, radius, start, end, map){
-      var point, previous, points=[], a=start;
-      do {
-        point = google.maps.geometry.spherical.computeOffset(center, radius, a);
-        points.push(point);
-        a++;
-        if (a>360){
-          a = 1;
-        }
-      } while(a!=end);
-      points.unshift(center);
-      points.push(center);
-      var poly = new google.maps.Polygon({
-        path: points,
-        map: map,
-        fillColor: 'red',
-        fillOpacity: 0.5
-      });
-      return poly;
     };
 
     $scope.clearTowers = function(){
