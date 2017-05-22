@@ -85,8 +85,17 @@ angular.module('tower.controllers', ['starter.controllers'])
         position: $scope.data.loc,
         animation: google.maps.Animation.DROP,
         icon: $scope.icon,
-        draggable: false, //Don't need them to mess with the arrow's positioning
+        draggable: true,
         map: $scope.map
+      });
+      google.maps.event.addDomListener($scope.marker, 'dragend', function(e){
+        var pos = $scope.marker.getPosition();
+        $scope.$apply(function(){
+          $scope.data.loc.lat = pos.lat();
+          $scope.data.loc.lng = pos.lng();
+          // Calculate the difference between true (gmaps) heading and magnetic heading at this location
+          $scope.heading.decl = geomagnetism.model().point([$scope.data.loc.lat, $scope.data.loc.lng]).decl;
+        });
       });
       // Refresh our current location
       $scope.centerOnMe();
@@ -192,16 +201,9 @@ angular.module('tower.controllers', ['starter.controllers'])
       }
     };
 
-    // Parse the tower string sent (TODO)and create stuff
+    // Create all the fun stuff for a tower
     $scope.towerPlot = function(tower, name){
       // Check service from the tower and pick a color
-      // if (data[4] == "N/A"){
-      //   var color = "#A9A9A9";
-      // } else if(data[4] == "No"){
-      //   var color = "#EE0000";
-      // } else {
-      //   var color = "#009400";
-      // }
       var color = (tower.devices.length > 0)?"#009A00":"#A9A9A9";
       //Draw a line to the tower, paint it, and give the tower an icon.
       var newLine = new google.maps.Polyline({
@@ -218,12 +220,13 @@ angular.module('tower.controllers', ['starter.controllers'])
         position: {lat: tower.lat, lng: tower.long}
       });
 
-      // Show label and set target heading when the tower is selected
+      // When we select a tower, show label, create the modal, and set map and heading
       google.maps.event.addListener(newLine, 'click', function(e){
         // Show label
         newLabel.open($scope.map);
         // Set up Modals for the tower
         var tscope = $scope.createSubscope(tower);
+        // When we close the info window for the tower, also remove the sector from the map
         google.maps.event.addListener(newLabel, 'closeclick', function(e){
           tscope.sector.setMap(null);
         });
@@ -234,7 +237,7 @@ angular.module('tower.controllers', ['starter.controllers'])
           tscope.close = function() {
             modal.hide();
             for (var i=0; i<tscope.devices.length; i++){
-              // Collapse all the devices info sections when we close out
+              // Collapse all the devices info sections when we close out modal
               tscope.devices[i].show = false;
             }
           };
@@ -245,15 +248,15 @@ angular.module('tower.controllers', ['starter.controllers'])
           };
           newLabel.setContent(el);
         });
-        // Set target heading
+        // Update heading and map for the new tower
         $scope.newTowerHeading(tower.lat, tower.long);
-        // tscope.items.direction = $filter('number')($scope.heading.goal);
       });
-      // Store a reference to the tower
+      // Store a reference to the tower so we can delete it later
       $scope.towers.lines.push(newLine);
       $scope.towers.labels.push(newLabel);
     };
 
+    // Helper method to focus the map and set the target heading when we select a new tower
     $scope.newTowerHeading = function(lat, long) {
       var myLoc = new google.maps.LatLng($scope.data.loc);
       var towerLoc = new google.maps.LatLng(lat, long);
@@ -272,6 +275,7 @@ angular.module('tower.controllers', ['starter.controllers'])
       }
     };
 
+    // Function to create the new scope for a tower
     $scope.createSubscope = function(tower) {
       var tscope = $scope.$new(true);
       tscope.name = name;
@@ -284,8 +288,10 @@ angular.module('tower.controllers', ['starter.controllers'])
         fillOpacity: 0.25,
         strokeColor: '#000099',
         strokeWeight: 2,
-        zIndex: -1
+        zIndex: -1 // Ensures the sector is behind everything so it doesn't get in the way
       });
+      // Save a reference to the sector so we can remove it
+      $scope.towers.polys.push(tscope.sector);
       tscope.towerLoc = new google.maps.LatLng(tower.lat, tower.long);
       tscope.toggleItem = function(item) {
         item.show = !item.show;
@@ -294,16 +300,19 @@ angular.module('tower.controllers', ['starter.controllers'])
         var end=(item.azimuth + item.beamwidth/2 + 360) % 360;
         var a=(item.azimuth - item.beamwidth/2 + 360) % 360;
         var dist = item.range * 1609.34;
+        // define the arc
         for (; a != end; a = (a+1)%360){
           point = google.maps.geometry.spherical.computeOffset(tscope.towerLoc, dist, a);
           points.push(point);
         }
+        // add the center point to complete the sector
         points.push(tscope.towerLoc);
         tscope.sector.setPath(points);
       };
       return tscope;
     };
 
+    // When we get a new set of towers, clear the old stuff away
     $scope.clearTowers = function(){
       angular.forEach($scope.towers.lines, function(val){val.setMap(null);});
       angular.forEach($scope.towers.labels, function(val){val.close();});
@@ -315,6 +324,7 @@ angular.module('tower.controllers', ['starter.controllers'])
       $scope.towers.labels = [];
       $scope.towers.polys = [];
     };
+
     //Clean up code. Stop following device heading and stop insomnia's keepawake.
     $scope.$on("$destroy", function(){
       if($scope.watch){
