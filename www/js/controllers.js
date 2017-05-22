@@ -13,7 +13,7 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         },
         qual:{
             levels: [],
-            los: "",
+            los: ""
         },
         plans: [],
         date: new Date(),
@@ -112,7 +112,7 @@ angular.module('starter.controllers', ['ui.router', 'ngCordova'])
         else data.shift();
         // If not qualified, do this
         if(!data[0] || data[0] == "None"){
-            $scope.qual = "No qualifications"
+            $scope.qual = "No qualifications";
             $scope.data.qual.levels = [];
             $scope.data.qual.los = "No Viewshed LOS or LTE service found";
         }

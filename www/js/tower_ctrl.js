@@ -99,8 +99,6 @@ angular.module('tower.controllers', ['starter.controllers'])
       });
       // Refresh our current location
       $scope.centerOnMe();
-      // Calculate the difference between true (gmaps) heading and magnetic heading at this location
-      $scope.heading.decl = geomagnetism.model().point([$scope.data.loc.lat, $scope.data.loc.lng]).decl;
       // Ask for towers
       // $scope.towerReq();
     };
