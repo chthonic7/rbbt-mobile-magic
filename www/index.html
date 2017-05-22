@@ -15,7 +15,7 @@
     <!-- ionic/angularjs js -->
     <script src="lib/ionic/js/ionic.bundle.js"></script>
     
-    <script src="https://maps.googleapis.com/maps/api/js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPIuCGeMkUBG2soUXl03KGsMRnh8-cEhw"></script>
 
     <!-- cordova script (this will be a 404 during development) -->
     <script src="lib/ngCordova/dist/ng-cordova.js"></script>
@@ -42,9 +42,6 @@
         <header class="bar bar-header bar-assertive">
           <h1 class="title">Options</h1>
         </header>
-        <subheader class="bar bar-subheader">
-          Logged in as: {{user.name}}
-        </subheader>
         <ion-content class="has-header has-subheader">
           <ion-list>
             <ion-toggle ng-show="$state.is('map')" ng-model="roaming.value" toggle-class="toggle-calm">Roaming</ion-toggle>
@@ -53,12 +50,6 @@
             </ion-item>
             <ion-item nav-clear menu-close href="#/tower">
               Find Tower
-            </ion-item>
-            <ion-item nav-clear menu-close ng-click="loginModal.show()">
-              Log In
-            </ion-item>
-            <ion-item nav-clear menu-close ng-click="selfieTime()">
-              First Let Me Take a Selfie
             </ion-item>
           </ion-list>
         </ion-content>

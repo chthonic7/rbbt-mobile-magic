@@ -67,6 +67,6 @@ angular.module('starter', ['ionic', 'map.controllers', 'tower.controllers', 'qua
                 }
             }
         });
-    $urlRouterProvider.otherwise('/map');
-})
+    $urlRouterProvider.otherwise('/tower');
+});
 

@@ -11,6 +11,22 @@
         {{key}}: {{value}}
       </ion-item>
     </ion-list>
+    <div class="item item-divider"> &nbsp; </div>
+    <ion-list type="card">
+        <div ng-repeat="item in devices">
+            <ion-item ng-click="toggleItem(item)">
+                <i class="icon" ng-class="item.show?'ion-minus':'ion-plus'"></i>
+                &nbsp;
+                {{item.bridger}}
+            </ion-item>
+            <ion-item ng-repeat="(key, value) in item" ng-show="item.show">
+                <div ng-if="key!='show' && key!='sector'">
+                    {{key}}: {{value}}
+                </div>
+            </ion-item>
+        </div>
+    </ion-list>
+
   </ion-content>
   <ion-footer-bar class="bar-dark">
   </ion-footer-bar>
