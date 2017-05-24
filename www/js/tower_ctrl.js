@@ -151,11 +151,11 @@ angular.module('tower.controllers', ['starter.controllers'])
       else{
         queryString = encodeURI("geo="+$scope.data.loc.lat+","+$scope.data.loc.lng+"&uid="+$scope.maddr.val);
       }
-      $http.post("https://sales.jabtools.com/ajax/mobile_v012.php",queryString, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then($scope.pResp, $scope.onFail);
+      $http.post("https://sales.jabtools.com/ajax/mobile_v012.php",queryString, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then($scope.parseResp, $scope.onFail);
     };
 
     // Break apart the result "string" that is sent back
-    $scope.pResp = function(resp){
+    $scope.parseResp = function(resp){
       var qualString = resp.data.split("\nTOWER:",1)[0].split("QUAL:")[1];
       // qualString = qualString.substr(0, qualString.search("\nTOWER:"));
       // alert(qualString);
@@ -169,7 +169,7 @@ angular.module('tower.controllers', ['starter.controllers'])
       var devicestrings = resp.data.split("\nDEVICE:").slice(1);
       for(var i=0; i < devicestrings.length; i++){
         var data = devicestrings[i].split(':');
-        towers[data[0]].devices.push({bridger: data[1], color: data[2], azimuth: +data[3], frequency: data[4], technology: data[5], services: data[6], beamwidth: +data[8], range: +data[9], show:false});
+        towers[data[0]].devices.push({bridger: data[1], 'Color code': data[2], azimuth: +data[3], frequency: data[4], technology: data[5], services: data[6], beamwidth: +data[8], range: +data[9], show:false});
       }
       console.log(towers);
       $scope.qualParse(qualString);

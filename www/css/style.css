@@ -8,3 +8,6 @@ map {
 .scroll {
   height: 100%;
 }
+.capitalize {
+    text-transform: capitalize;
+}

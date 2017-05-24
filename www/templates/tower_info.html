@@ -22,7 +22,7 @@
             <ion-item ng-repeat="(key, value) in item" ng-show="item.show">
                 <div ng-if="key!='show' && key!='sector'">
                     &nbsp;
-                    {{key}}: {{value}}
+                    <span class="capitalize">{{key}}: </span>{{value}}
                 </div>
             </ion-item>
         </div>
