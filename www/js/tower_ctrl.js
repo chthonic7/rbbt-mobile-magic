@@ -1,5 +1,10 @@
 angular.module('tower.controllers', ['starter.controllers'])
-  .controller('twrCtrl', function($scope, $ionicLoading, $ionicPlatform, $cordovaDeviceOrientation, $http, $ionicModal, $filter) {
+  .controller('twrCtrl', function($scope, $ionicLoading, $ionicPlatform, $cordovaDeviceOrientation, $http, $ionicModal, $filter, $stateParams) {
+    console.log($stateParams);
+    $scope.data.loc.lat = +$stateParams.lat;
+    $scope.data.loc.lng = +$stateParams.long;
+    // Handle entered feedback code when map is ready
+
     // app setup
     $ionicPlatform.ready(function() {
       // Prevent the phone from going to sleep
@@ -98,9 +103,15 @@ angular.module('tower.controllers', ['starter.controllers'])
         });
       });
       // Refresh our current location
-      $scope.centerOnMe();
+      // $scope.centerOnMe();
+      $scope.heading.decl = geomagnetism.model().point([$scope.data.loc.lat, $scope.data.loc.lng]).decl;
       // Ask for towers
       // $scope.towerReq();
+
+      // If a feedback code was entered, take the returned string and process it
+      if ($stateParams.feedback !== ''){
+        $scope.parseResp({data: $stateParams.feedback});
+      }
     };
 
     // Grab the lat/long
@@ -156,9 +167,10 @@ angular.module('tower.controllers', ['starter.controllers'])
 
     // Break apart the result "string" that is sent back
     $scope.parseResp = function(resp){
-      var qualString = resp.data.split("\nTOWER:",1)[0].split("QUAL:")[1];
-      // qualString = qualString.substr(0, qualString.search("\nTOWER:"));
+      var qualString = resp.data.split("\nFEEDBACK:",1)[0].split("QUAL:")[1];
       // alert(qualString);
+      var feedbackString = resp.data.split("\nTOWER:",1)[0].split("FEEDBACK:")[1];
+      $scope.feedback.val = feedbackString.split(":")[0];
       // strip off the devices for the towers
       var towerstrings = resp.data.split("\nDEVICE:",1)[0].split("\nTOWER:").slice(1);
       var towers = {};

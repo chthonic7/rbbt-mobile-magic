@@ -39,17 +39,23 @@
 
     <ion-side-menus enable-menu-with-back-views="true">
       <ion-side-menu side="left">
-        <header class="bar bar-header bar-assertive">
+        <ion-header-bar class="bar-assertive">
           <h1 class="title">Options</h1>
-        </header>
+        </ion-header-bar>
+        <ion-header-bar class="bar-subheader">
+            <h2 class="title">Feedback ID: {{feedback.val}}</h2>
+        </ion-header-bar>
         <ion-content class="has-header has-subheader">
           <ion-list>
             <ion-toggle ng-show="$state.is('map')" ng-model="roaming.value" toggle-class="toggle-calm">Roaming</ion-toggle>
-            <ion-item nav-clear menu-close ng-click="resetId()" ng-href="#/map">
-              New Lead
+            <ion-item nav-clear menu-close ng-click="resetId()" href="#/map?lat={{data.loc.lat}}&long={{data.loc.lng}}">
+              Feedback
             </ion-item>
-            <ion-item nav-clear menu-close href="#/tower">
+            <ion-item nav-clear menu-close href="#/tower?lat={{data.loc.lat}}&long={{data.loc.lng}}">
               Find Tower
+            </ion-item>
+            <ion-item nav-clear menu-close ng-click="getFeedbackCode()">
+              Enter Feedback Code
             </ion-item>
           </ion-list>
         </ion-content>

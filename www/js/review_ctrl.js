@@ -1,5 +1,5 @@
 angular.module('review.controller', ['ngCordova'])
-.controller('reviewCtrl', function($scope, $state, $ionicPlatform, $cordovaFile, $http){
+  .controller('reviewCtrl', function($scope, $state, $ionicPlatform, $cordovaFile, $http){
     // $scope.init = function(){
     //     $ionicPlatform.ready(function(){
     //         if(window.cordova && window.cordova.file){
@@ -16,27 +16,27 @@ angular.module('review.controller', ['ngCordova'])
     //     });
     // };
     $scope.finalize = function(){
-        var queryString = encodeURI("record="+$scope.uuid+"&deleted=0"+"&uid="+$scope.maddr.val);
-        $http.post("https://sales.jabtools.com/ajax/mobile.php", queryString, {headers:{'Content-Type': 'application/x-www-form-urlencoded'}}).then(
-            function(){$scope.resetId();},
-            function(){$scope.resetId(); alert("Could not access network");});
-        $state.go('map');
+      var queryString = encodeURI("record="+$scope.uuid+"&deleted=0"+"&uid="+$scope.maddr.val);
+      $http.post("https://sales.jabtools.com/ajax/mobile.php", queryString, {headers:{'Content-Type': 'application/x-www-form-urlencoded'}}).then(
+        function(){$scope.resetId();},
+        function(){$scope.resetId(); alert("Could not access network");});
+      $state.go('map');
     };
     $scope.reGeo = function(){
-        $scope.data.addr.street = "";
-        $scope.data.addr.city = "";
-        $scope.data.addr.state = "";
-        $scope.data.addr.postal = "";
-        $scope.data.qual.levels = [];
-        $scope.data.qual.los = "";
-        $scope.data.plans = [];
-        $scope.data.date = new Date();
-        $scope.data.cust.fname = "";
-        $scope.data.cust.lname = "";
-        $scope.data.cust.phone = "";
-        $scope.data.cust.email = "";
-        $scope.data.cust.notes = "";
-        $scope.qual = "Qualification pending...";
-        $state.go('map');
+      $scope.data.addr.street = "";
+      $scope.data.addr.city = "";
+      $scope.data.addr.state = "";
+      $scope.data.addr.postal = "";
+      $scope.data.qual.levels = [];
+      $scope.data.qual.los = "";
+      $scope.data.plans = [];
+      $scope.data.date = new Date();
+      $scope.data.cust.fname = "";
+      $scope.data.cust.lname = "";
+      $scope.data.cust.phone = "";
+      $scope.data.cust.email = "";
+      $scope.data.cust.notes = "";
+      $scope.qual = "Qualification pending...";
+      $state.go('map', {lat: $scope.data.lat, long: $scope.data.lng});
     };
-})
+  });
